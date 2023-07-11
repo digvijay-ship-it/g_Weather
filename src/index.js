@@ -1,26 +1,21 @@
 // make a function that get live weather of london if user don't provide there location
+import { getWeatherData } from "./weatherAppFunction";
 
-function getCurrentPosition() {
-  return new Promise((resolve, reject) => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(resolve, reject);
-    } else {
-      return new Error("Geolocation is not supported by this browser");
-    }
-  });
-}
-
-async function getLocation() {
+async function fillWeatherData(cityName) {
   try {
-    const position = await getCurrentPosition();
-    const latitude = position.coords.latitude;
-    const longitude = position.coords.longitude;
-
-    // based on these latitude and longitude get city name
-    // based on that location load weather
+    const weatherData = await getWeatherData(cityName);
+    // weatherData = weatherData.json();
+    if (weatherData.ok) {
+      const data = await weatherData.json();
+      const { current } = data;
+      const { forecast } = data;
+    }
   } catch (error) {
+    // it hits when city don't exist
     console.error("Error: " + error.message);
-    // else load weather on london
   }
 }
-getLocation();
+
+const cityName = "london";
+
+fillWeatherData(cityName);
