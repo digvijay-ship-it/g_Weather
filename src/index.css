@@ -1,0 +1,16 @@
+body {
+  background-image: url("./img/beautifulShotColorfulAutumn.jpg");
+  background-size: cover;
+}
+
+#header {
+  display: flex;
+}
+
+.weather-details svg {
+  width: 20px;
+  height: 20px;
+}
+.weather-details {
+  display: flex;
+}
