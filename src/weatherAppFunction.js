@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 async function getWeatherData(cityName) {
   const weatherApiKey = "27acc16706c6403b915124430231607";
   const response = await fetch(
@@ -72,14 +74,6 @@ function makeWeatherInfo() {
   const temperatureElement = document.createElement("div");
   temperatureElement.classList.add("weather-info__temperature");
 
-  // Create the weather-info_units-f element
-  const unitsFElement = document.createElement("div");
-  unitsFElement.classList.add("weather-info_units-f");
-
-  // Create the weather-info__units-c element
-  const unitsCElement = document.createElement("div");
-  unitsCElement.classList.add("weather-info__units-c");
-
   // Create the weather-info_icon element
   const iconElement = document.createElement("div");
   iconElement.classList.add("weather-info_icon");
@@ -117,8 +111,6 @@ function makeWeatherInfo() {
   weatherInfoContainer.appendChild(dateElement);
   weatherInfoContainer.appendChild(timeElement);
   weatherInfoContainer.appendChild(temperatureElement);
-  weatherInfoContainer.appendChild(unitsFElement);
-  weatherInfoContainer.appendChild(unitsCElement);
   weatherInfoContainer.appendChild(iconElement);
 
   searchBoxContainer.appendChild(searchBoxInput);
@@ -214,14 +206,83 @@ function makePageHeader(current) {
   return header;
 }
 
+function fillHourlyContainer(forecast) {
+  const hourlyContainer = document.querySelector("#hourly");
+  // run a loop for 0-23 and make createForecastHourly
+  for (let index = 0; index < forecast.forecastday[0].hour.length; index += 1) {
+    const date = new Date(forecast.forecastday[0].hour[index].time);
+    const hour = format(date, "hh:a	");
+    const temp = forecast.forecastday[0].hour[index].temp_c;
+    const svg = forecast.forecastday[0].hour[index].condition.icon;
+    hourlyContainer.append(createForecastHourly(temp, hour, svg));
+  }
+}
+
+function createForecastHourly(temp, time, svgData) {
+  const forecastHourly = document.createElement("div");
+  forecastHourly.classList.add("forecast-hourly");
+
+  const forecastHourlyDay = document.createElement("div");
+  forecastHourlyDay.classList.add("forecast-hourly-day");
+  forecastHourlyDay.textContent = time;
+  forecastHourly.appendChild(forecastHourlyDay);
+
+  const forecastHourlyTemperature = document.createElement("div");
+  forecastHourlyTemperature.classList.add("forecast-hourly-temperature");
+
+  const forecastHourlyTemperatureHigh = document.createElement("div");
+  forecastHourlyTemperatureHigh.classList.add(
+    "forecast-hourly-temperature-high"
+  );
+  forecastHourlyTemperatureHigh.textContent = temp + "C.";
+  forecastHourlyTemperature.appendChild(forecastHourlyTemperatureHigh);
+
+  forecastHourly.appendChild(forecastHourlyTemperature);
+
+  const forecastHourlyIcon = document.createElement("div");
+  forecastHourlyIcon.classList.add("forecast-hourly-icon");
+
+  const icon = new Image();
+  icon.src = svgData;
+
+  forecastHourlyIcon.appendChild(icon);
+  forecastHourly.appendChild(forecastHourlyIcon);
+
+  return forecastHourly;
+}
+
+function makeWeatherForecast() {
+  // Create the weatherForecast element
+  const weatherForecast = document.createElement("div");
+  weatherForecast.classList.add("weatherForecast");
+
+  const forecastHourlyContainer = document.createElement("div");
+  forecastHourlyContainer.classList.add("forecastHourlyContainer");
+  forecastHourlyContainer.textContent = "Today forecast by hours";
+
+  // Create the hourly element
+  const hourly = document.createElement("div");
+  hourly.id = "hourly";
+  forecastHourlyContainer.append(hourly);
+
+  // Create the allDays element
+  const allDays = document.createElement("div");
+  allDays.id = "allDays";
+
+  // Append hourly and allDays to the weatherForecast
+  weatherForecast.appendChild(forecastHourlyContainer);
+  weatherForecast.appendChild(allDays);
+  return weatherForecast;
+}
+
 function weatherPageMaker(current) {
   // Create the main container element
   const mainContainer = document.createElement("div");
   mainContainer.id = "main";
 
   // Append header and weatherForecast to the main container
-  const header = makePageHeader(current);
-  mainContainer.appendChild(header);
+  mainContainer.appendChild(makePageHeader(current));
+  mainContainer.appendChild(makeWeatherForecast());
 
   // Append the main container to the document body
   document.body.appendChild(mainContainer);
@@ -229,28 +290,32 @@ function weatherPageMaker(current) {
 
 async function fillWeatherData(cityName) {
   const errorMsgContainer = document.querySelector(".error-msg");
-  try {
-    const weatherData = await getWeatherData(cityName);
-    // weatherData = weatherData.json();
-    if (weatherData.ok) {
-      if (errorMsgContainer) {
-        errorMsgContainer.style.visibility = "hidden";
-      }
-      // make empty body
-      document.body.innerText = "";
-
-      const data = await weatherData.json();
-      const { current } = data;
-      const { location } = data;
-      weatherPageMaker(current);
-      fillHeaderWeatherInfo(current, location);
-    } else {
-      errorMsgContainer.style.visibility = "visible";
+  // try {
+  const weatherData = await getWeatherData(cityName);
+  // weatherData = weatherData.json();
+  if (weatherData.ok) {
+    if (errorMsgContainer) {
+      errorMsgContainer.style.visibility = "hidden";
     }
-  } catch (error) {
-    // it hits when city don't exist
-    console.error(`Error: ${error.message}`);
+    // make empty body
+    document.body.innerText = "";
+
+    const data = await weatherData.json();
+    const { current } = data;
+    const { forecast } = data;
+    const { location } = data;
+    console.log(current);
+    console.log(forecast);
+    weatherPageMaker(current);
+    fillHeaderWeatherInfo(current, location);
+    fillHourlyContainer(forecast);
+  } else {
+    errorMsgContainer.style.visibility = "visible";
   }
+  // } catch (error) {
+  // it hits when city don't exist
+  // console.error(`Error: ${error.message}`);
+  // }
 }
 
 export { getWeatherData, weatherPageMaker, fillWeatherData };

@@ -14,3 +14,10 @@ body {
 .weather-details {
   display: flex;
 }
+#hourly {
+  display: flex;
+  background-color: rgba(0, 0, 0, 0.355);
+  color: white;
+  overflow: scroll;
+  gap: 30px;
+}
