@@ -1,6 +1,7 @@
 body {
   background-image: url("./img/beautifulShotColorfulAutumn.jpg");
   background-size: cover;
+  color: white;
 }
 
 #header {
@@ -18,7 +19,6 @@ body {
 .forecast-daily-container {
   display: flex;
   background-color: rgba(0, 0, 0, 0.355);
-  color: white;
   overflow: scroll;
   gap: 30px;
 }
