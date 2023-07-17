@@ -1,7 +1,7 @@
 import { format } from "date-fns";
 
 async function getWeatherData(cityName) {
-  const weatherApiKey = "27acc16706c6403b915124430231607";
+  const weatherApiKey = "a1fea6468d8c4123b3e100519231707";
   const response = await fetch(
     `https://api.weatherapi.com/v1/forecast.json?key= ${weatherApiKey}&q=${cityName}&days=15`
   );
@@ -218,6 +218,63 @@ function fillHourlyContainer(forecast) {
   }
 }
 
+function fillAllDaysContainer(forecast) {
+  const allDaysContainer = document.querySelector("#allDays");
+  allDaysContainer.textContent = `Next ${forecast.forecastday.length} days forecast`;
+  // run a loop for available  days and make
+  const forecastDailyContainer = document.createElement("div");
+  forecastDailyContainer.classList.add("forecast-daily-container");
+  for (let index = 0; index < forecast.forecastday.length; index += 1) {
+    const minTemp = forecast.forecastday[index].day.mintemp_c;
+    const maxTemp = forecast.forecastday[index].day.maxtemp_c;
+    const date = new Date(forecast.forecastday[index].date);
+    const day = format(date, "EEEE");
+    const svg = forecast.forecastday[index].day.condition.icon;
+    forecastDailyContainer.append(
+      createForecastDays(minTemp, maxTemp, day, svg)
+    );
+  }
+  allDaysContainer.append(forecastDailyContainer);
+}
+
+function createForecastDays(minTemp, maxTemp, day, svgData) {
+  const forecastDaily = document.createElement("div");
+  forecastDaily.classList.add("forecast-daily");
+
+  const forecastDailyDay = document.createElement("div");
+  forecastDailyDay.classList.add("forecast-daily__day");
+  forecastDailyDay.textContent = day;
+  forecastDaily.appendChild(forecastDailyDay);
+
+  const forecastDailyTemperature = document.createElement("div");
+  forecastDailyTemperature.classList.add("forecast-daily__temperature");
+
+  const forecastDailyTemperatureHigh = document.createElement("div");
+  forecastDailyTemperatureHigh.classList.add(
+    "forecast-daily__temperature-high"
+  );
+  forecastDailyTemperatureHigh.textContent = maxTemp + " °C";
+  forecastDailyTemperature.appendChild(forecastDailyTemperatureHigh);
+
+  const forecastDailyTemperatureLow = document.createElement("div");
+  forecastDailyTemperatureLow.classList.add("forecast-daily__temperature-low");
+  forecastDailyTemperatureLow.textContent = minTemp + " °C";
+  forecastDailyTemperature.appendChild(forecastDailyTemperatureLow);
+
+  forecastDaily.appendChild(forecastDailyTemperature);
+
+  const forecastDailyIcon = document.createElement("div");
+  forecastDailyIcon.classList.add("forecast-daily__icon");
+
+  const svg = new Image();
+  svg.src = svgData;
+
+  forecastDailyIcon.appendChild(svg);
+  forecastDaily.appendChild(forecastDailyIcon);
+
+  return forecastDaily;
+}
+
 function createForecastHourly(temp, time, svgData) {
   const forecastHourly = document.createElement("div");
   forecastHourly.classList.add("forecast-hourly");
@@ -309,6 +366,7 @@ async function fillWeatherData(cityName) {
     weatherPageMaker(current);
     fillHeaderWeatherInfo(current, location);
     fillHourlyContainer(forecast);
+    fillAllDaysContainer(forecast);
   } else {
     errorMsgContainer.style.visibility = "visible";
   }

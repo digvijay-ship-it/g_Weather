@@ -14,7 +14,8 @@ body {
 .weather-details {
   display: flex;
 }
-#hourly {
+#hourly,
+.forecast-daily-container {
   display: flex;
   background-color: rgba(0, 0, 0, 0.355);
   color: white;
